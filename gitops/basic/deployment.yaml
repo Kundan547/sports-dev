@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sportsdev
+  labels:
+    app: sportsdev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sportsdev
+  template:
+    metadata:
+      labels:
+        app: sportsdev
+    spec:
+      containers:
+        - name: sportsdev
+          image: kundan547/sportdev:v1.0.1
+          ports:
+            - containerPort: 80
