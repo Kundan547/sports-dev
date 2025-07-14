@@ -30,12 +30,9 @@ jobs:
     - name: Push Docker Image
       run: docker push kundan547/sportdev:${{ env.IMAGE_TAG }}
 
-    - name: Install yq
-      run: sudo apt-get install -y yq
-
     - name: Update image tag in deployment.yaml
       run: |
-        yq e '.spec.template.spec.containers[0].image = "kundan547/sportdev:${{ env.IMAGE_TAG }}"' -i gitops/basic/deployment.yaml
+        sed -i "s|image: kundan547/sportdev:.*|image: kundan547/sportdev:${IMAGE_TAG}|" gitops/basic/deployment.yaml
 
     - name: Commit and Push updated deployment.yaml
       env:
@@ -46,7 +43,7 @@ jobs:
         git remote set-url origin https://x-access-token:${GH_PAT}@github.com/Kundan547/sports-dev.git
         git add gitops/basic/deployment.yaml
         if ! git diff --cached --quiet; then
-          git commit -m "Update image to ${{ env.IMAGE_TAG }}"
+          git commit -m "Update image to ${IMAGE_TAG}"
           git push origin master
         else
           echo "No changes to commit."
