@@ -35,9 +35,13 @@ jobs:
         sed -i 's|kundan547/sportdev:.*|kundan547/sportdev:${{ env.IMAGE_TAG }}|' gitops/basic/deployment.yaml
 
     - name: Commit and Push updated deployment.yaml
+      env:
+        GH_PAT: ${{ secrets.GH_PAT }}
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
+        git remote set-url origin https://x-access-token:${GH_PAT}@github.com/Kundan547/sports-dev.git
         git add gitops/basic/deployment.yaml
         git commit -m "Update image to ${{ env.IMAGE_TAG }}"
         git push origin master
+
