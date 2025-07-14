@@ -9,6 +9,7 @@ on:
       - '**.css'
       - '**.js'
       - 'Dockerfile'
+      - 'gitops/basic/deployment.yaml'
 
 jobs:
   build-and-push:
