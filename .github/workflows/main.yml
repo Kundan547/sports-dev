@@ -44,4 +44,3 @@ jobs:
         git add gitops/basic/deployment.yaml
         git commit -m "Update image to ${{ env.IMAGE_TAG }}"
         git push origin master
-
