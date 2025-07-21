@@ -17,10 +17,13 @@ jobs:
 
     env:
       IMAGE_TAG: v1.0.${{ github.run_number }}
+      PR_BRANCH: update-image-${{ github.run_number }}
 
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # important to allow branch creation
 
     - name: Log in to Docker Hub
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -35,17 +38,35 @@ jobs:
       run: |
         sed -i "s|image: kundan547/sportdev:.*|image: kundan547/sportdev:${IMAGE_TAG}|" gitops/basic/deployment.yaml
 
-    - name: Commit and Push updated deployment.yaml
+    - name: Create Pull Request with updated deployment.yaml
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
-        git remote set-url origin https://x-access-token:${GH_PAT}@github.com/Kundan547/sports-dev.git
+
+        git checkout -b $PR_BRANCH
+
         git add gitops/basic/deployment.yaml
-        if ! git diff --cached --quiet; then
-          git commit -m "Update image to ${IMAGE_TAG}"
-          git push origin master
-        else
+
+        if git diff --cached --quiet; then
           echo "No changes to commit."
+          exit 0
         fi
+
+        git commit -m "Update image to ${IMAGE_TAG}"
+        git push https://x-access-token:${GH_PAT}@github.com/Kundan547/sports-dev.git $PR_BRANCH
+
+        # Install GitHub CLI
+        sudo apt-get update
+        sudo apt-get install -y gh
+
+        # Authenticate GitHub CLI
+        echo $GH_PAT | gh auth login --with-token
+
+        # Create PR
+        gh pr create \
+          --title "Update image to ${IMAGE_TAG}" \
+          --body "Automated PR to update Docker image tag in deployment.yaml" \
+          --base master \
+          --head $PR_BRANCH
