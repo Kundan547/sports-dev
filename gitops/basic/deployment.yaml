@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: sportsdev
-          image: kundan547/sportdev:v1.0.35
+          image: kundan547/sportdev:v1.0.36
           ports:
             - containerPort: 80
